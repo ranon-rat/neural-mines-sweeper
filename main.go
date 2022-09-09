@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 
 	"github.com/ranon-rat/neural-mines-sweeper/src/brain"
 )
@@ -14,23 +15,28 @@ var (
 		{1, 1},
 	}
 	target = [][]float64{
-		{1, 0},
-		{0, 1},
-		{0, 1},
-		{1, 0},
+		{0},
+		{1},
+		{1},
+		{0},
 	}
 )
 
 func main() {
 
-	w, bias := brain.NeuralNetwork([]int{2, 3, 3, 2})
-	mathFuncs := []string{"sigmoid", "sigmoid", "sigmoid"}
+	w, bias := brain.NeuralNetwork([]int{2, 3, 3, 1})
+	mathFuncs := []string{"tanh", "tanh", "tanh"}
 	fmt.Println(bias)
-	w, bias = brain.Train(0.1, mathFuncs, w, bias, dataset, target, 1000)
 
-	for i, v := range dataset {
+	for i := 0; i < 30; i++ {
+		pos := rand.Intn(len(dataset) - 1)
+
+		v := dataset[pos]
+
+		w, bias = brain.Train(0.5, mathFuncs, w, bias, [][]float64{dataset[pos]}, [][]float64{target[pos]}, 1)
+
 		output, _ := brain.FeedFoward(v, mathFuncs, w, bias)
-		fmt.Println("is x bigger than x", output, target[i])
+		fmt.Println(v, output, target[pos])
 
 	}
 
