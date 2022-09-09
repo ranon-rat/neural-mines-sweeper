@@ -59,14 +59,12 @@ func FeedFoward(input []float64, mathFuncPerLayer []string, weights [][][]float6
 // how the fuck i did this ?
 func BackPropagation(weights [][][]float64, bias, layers [][]float64, expected []float64, mathFuncPerLayer []string) ([][][]float64, [][]float64) {
 	bd := make([][]float64, len(bias))
-
 	wd := make([][][]float64, len(weights))
 	errors := make([]float64, len(expected))
 	layer := layers[len(layers)-1]
 	// i get the errors  doing a really simple thing
 	for i, n := range layer {
 		errors[i] = n - expected[i]
-
 	}
 
 	for l := len(bias) - 1; l >= 0; l-- {
@@ -78,17 +76,17 @@ func BackPropagation(weights [][][]float64, bias, layers [][]float64, expected [
 
 		for i := range bias[l] {
 			// so , the gradient its added to the bias
-			// so , by doing this its correct
-			bd[l][i] = (errors[i] * MathFuncs[mathFuncPerLayer[l]]["derivative"](layer[i]))
+			// so ,its supose to work
+			bd[l][i] += (errors[i] * MathFuncs[mathFuncPerLayer[l]]["derivative"](layer[i]))
 		}
 		// okay , so I multiply layers_lt*gradient
 		//
-		for n := 0; n < len(weights[l]); n++ {
+		for n := 0; n < len(wd[l]); n++ {
 			wd[l][n] = make([]float64, len(weights[l][n]))
 
 			for i := range weights[l][n] {
 
-				wd[l][n][i] = layers[l][n] * (bd[l][i])
+				wd[l][n][i] += layers[l][n] * (bd[l][i])
 			}
 		}
 
@@ -98,16 +96,15 @@ func BackPropagation(weights [][][]float64, bias, layers [][]float64, expected [
 
 		layer = layers[l]
 		errorcp := make([]float64, len(layer))
-		// i just multiply the errors by the weight of this layer
-		// it supose to get the value that i Want but I dont really know why its not working or maybe it is but im too stupid for find that
 
+		// i just multiply the errors by the weight of this layer
+		//
 		for i := range layer {
 			// this supose to get me the errors of the l-1
 			// but maybe something its not working properly
 			// but I dont really know
 			err := 0.0
 			for j := range errors {
-				// I just
 				err += weights[l][i][j] * errors[j]
 			}
 			errorcp[i] = err
@@ -141,37 +138,19 @@ func UpdateWeightAndBias(size, learningRate float64, weights [][][]float64, bias
 func Train(learningRate float64, mathFuncs []string, weights [][][]float64, bias, dataset [][]float64, expected [][]float64, epochs int) ([][][]float64, [][]float64) {
 	for i := 0; i < epochs; i++ {
 
-		//bdSum := make([][]float64, len(bias))
-		//wdSum := make([][][]float64, len(weights))
+		// I DONT FUCKING NOW WHY ITS NOT WORKING
+		// IT SUPOSE TO WORK
+		// IM MAKING THE SAME FROM A PROJECT THAT I MADE
+		// BUT ITS NOT WORKING FOR SOME REASON
+		//FUck
+
 		for j, v := range dataset {
 			_, layers := FeedFoward(v, mathFuncs, weights, bias)
 
 			wd, bd := BackPropagation(weights, bias, layers, expected[j], mathFuncs)
 			weights, bias = UpdateWeightAndBias(1, learningRate, weights, bias, wd, bd)
 
-			//	for l := len(layers) - 2; l >= 0; l-- {
-			//		if len(bdSum[l]) == 0 {
-			//			bdSum[l] = make([]float64, len(bias[l]))
-			//			wdSum[l] = make([][]float64, len(weights[l]))
-			//		}
-			//		for i := range bias[l] {
-			//
-			//			bdSum[l][i] += bd[l][i]
-			//		}
-			//		for n := 0; n < len(weights[l]); n++ {
-			//			if len(wdSum[l][n]) == 0 {
-			//				wdSum[l][n] = make([]float64, len(weights[l][n]))
-			//			}
-			//			for i := range weights[l][n] {
-			//
-			//				wdSum[l][n][i] += wd[l][n][i]
-			//			}
-			//		}
-			//
-			//	}
-
 		}
-		//		weights, bias = UpdateWeightAndBias(float64(len(dataset)), learningRate, weights, bias, wdSum, bdSum)
 
 	}
 	return weights, bias
