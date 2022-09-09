@@ -68,3 +68,11 @@ func mod(y, x float64) float64 {
 	}
 	return val
 }
+
+func Cost(target []float64, output []float64) float64 {
+	err := 0.0
+	for i := range target {
+		err += math.Abs(output[i] - target[i])
+	}
+	return err
+}

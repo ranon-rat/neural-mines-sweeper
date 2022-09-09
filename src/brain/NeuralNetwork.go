@@ -1,8 +1,8 @@
 package brain
 
 import (
+	"fmt"
 	"math/rand"
-	"sync"
 	"time"
 )
 
@@ -17,23 +17,24 @@ func NeuralNetwork(neuronsPerLayer []int) (weights [][][]float64, bias [][]float
 
 			weights[i] = append(weights[i], []float64{})
 			for w := 0; w < neuronsPerLayer[i+1]; w++ {
-				weights[i][n] = append(weights[i][n], rand.Float64())
+				weights[i][n] = append(weights[i][n], rand.Float64()/2)
 			}
 
 		}
 		for n := 0; n < neuronsPerLayer[i+1]; n++ {
 			// i dont need to know the bias for the input but whatever
-			bias[i] = append(bias[i], rand.Float64())
+			bias[i] = append(bias[i], rand.Float64()/2)
 		}
 	}
 
 	return
 }
 
-func FeedFoward(mathFuncPerLayer []string, input []float64, weights [][][]float64, bias [][]float64) (output []float64, layers [][]float64) {
+func FeedFoward(input []float64, mathFuncPerLayer []string, weights [][][]float64, bias [][]float64) (output []float64, layers [][]float64) {
 	layers = make([][]float64, len(bias)+1)
 
-	layers[0] = input
+	layers[0] = make([]float64, len(input))
+	copy(layers[0], input)
 	for l := 0; l < len(layers)-1; l++ {
 		layers[l+1] = make([]float64, len(bias[l]))
 
@@ -57,7 +58,7 @@ func FeedFoward(mathFuncPerLayer []string, input []float64, weights [][][]float6
 
 // what im doing with my life :weary:
 // how the fuck i did this ?
-func BackPropagation(weights [][][]float64, bias, layers [][]float64, expected []float64, mathFuncPerLayer []string) ([][][]float64, [][]float64) {
+func BackPropagation(size float64, weights [][][]float64, bias, layers [][]float64, expected []float64, mathFuncPerLayer []string) ([][][]float64, [][]float64) {
 	bd := make([][]float64, len(bias))
 	wd := make([][][]float64, len(weights))
 	errors := make([]float64, len(expected))
@@ -79,7 +80,8 @@ func BackPropagation(weights [][][]float64, bias, layers [][]float64, expected [
 
 			for i := range weights[l][n] {
 
-				wd[l][n][i] = ((bd[l][i]) * layers[l][n])
+				wd[l][n][i] = ((bd[l][i]) * layers[l][n]) / size
+				bd[l][i] /= size
 			}
 		}
 
@@ -90,9 +92,9 @@ func BackPropagation(weights [][][]float64, bias, layers [][]float64, expected [
 		layer = layers[l]
 		errorcp := make([]float64, len(layer))
 		for i := range layer {
-			var err float64 = 0.0
-			for j := range errors {
-				err += weights[l][i][j] * errors[j]
+			err := 0.0
+			for j, v := range errors {
+				err += weights[l][i][j] * v
 			}
 			errorcp[i] = err
 		}
@@ -102,44 +104,42 @@ func BackPropagation(weights [][][]float64, bias, layers [][]float64, expected [
 
 	return wd, bd
 }
-func Train(learningRate float64, mathFuncs []string, weights [][][]float64, bias, dataset [][]float64, expected [][]float64, epochs int) ([][][]float64, [][]float64) {
-	var wg sync.WaitGroup
-	for i := 0; i < epochs; i++ {
-		weightsGrad := make([][][][]float64, len(dataset))
-		biasGrad := make([][][]float64, len(dataset))
-		for j, v := range dataset {
-			wg.Add(1)
-			go func(j int, v []float64) {
-				_, layers := FeedFoward(mathFuncs, v, weights, bias)
+func UpdateWeightAndBias(learningRate float64, weights [][][]float64, bias [][]float64, weightsGrad [][][]float64, biasGrad [][]float64) ([][][]float64, [][]float64) {
 
-				wd, bd := BackPropagation(weights, bias, layers, expected[j], mathFuncs)
-				weightsGrad[j] = wd
-				biasGrad[j] = bd
-				wg.Done()
+	for l := 0; l < len(weights)-1; l++ {
 
-			}(j, v)
-		}
-		wg.Wait()
-		for j := range dataset {
-			for l := 0; l < len(weights)-1; l++ {
+		for n := 0; n < len(weights[l]); n++ {
 
-				for n := 0; n < len(weights[l]); n++ {
+			for i := range weights[l][n] {
 
-					for i := range weights[l][n] {
-
-						weights[l][n][i] -= (weightsGrad[j][l][n][i] / float64(len(dataset))) * learningRate
-					}
-
-				}
-				for i := range bias[l] {
-					bias[l][i] -= (biasGrad[j][l][i] / float64(len(dataset))) * learningRate
-				}
-				//	wg.Done()
-				//}(j, v)
-				//wg.Wait()
+				weights[l][n][i] -= (weightsGrad[l][n][i]) * learningRate
 			}
+
+		}
+		for i := range bias[l] {
+			bias[l][i] -= (biasGrad[l][i]) * learningRate
 		}
 
+	}
+
+	return weights, bias
+}
+func Train(learningRate float64, mathFuncs []string, weights [][][]float64, bias, dataset [][]float64, expected [][]float64, epochs int) ([][][]float64, [][]float64) {
+	for i := 0; i < epochs; i++ {
+
+		err := 0.0
+		for j, v := range dataset {
+			out, layers := FeedFoward(v, mathFuncs, weights, bias)
+
+			wd, bd := BackPropagation(float64(len(dataset)), weights, bias, layers, expected[j], mathFuncs)
+			weights, bias = UpdateWeightAndBias(learningRate, weights, bias, wd, bd)
+
+			err += Cost(expected[j], out)
+
+		}
+		if i%10 == 0 {
+			fmt.Println(err)
+		}
 	}
 	return weights, bias
 }

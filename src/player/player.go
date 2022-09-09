@@ -49,7 +49,7 @@ func (p *Player) Evaluate(yMv, xMv int, board [][]int) {
 			// first I get the input from the board
 			input := getInput(p.VisibleBoard, v.Y, v.X)
 			// then i pass it to the neural network
-			output, _ := brain.FeedFoward(p.MathFuncsPerLayer, input, p.Weights, p.Biases)
+			output, _ := brain.FeedFoward(input, p.MathFuncsPerLayer, p.Weights, p.Biases)
 			// the index 0 is for opening the cell
 			calfAndPos = append(calfAndPos, CalfAndPos{Calf: output[0], Pos: v})
 
