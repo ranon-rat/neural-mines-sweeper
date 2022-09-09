@@ -94,7 +94,7 @@ func BackPropagation(weights [][][]float64, bias, layers [][]float64, expected [
 		for i := range layer {
 			err := 0.0
 			for j := range errors {
-				err *= weights[l][i][j] * errors[j]
+				err += weights[l][i][j] * errors[j]
 			}
 			errorcp[i] = err
 		}
@@ -112,12 +112,12 @@ func UpdateWeightAndBias(size, learningRate float64, weights [][][]float64, bias
 
 			for i := range weights[l][n] {
 
-				weights[l][n][i] += ((weightsGrad[l][n][i]) * learningRate) / size
+				weights[l][n][i] -= ((weightsGrad[l][n][i]) * learningRate) / size
 			}
 
 		}
 		for i := range bias[l] {
-			bias[l][i] += ((biasGrad[l][i]) * learningRate) / size
+			bias[l][i] -= ((biasGrad[l][i]) * learningRate) / size
 		}
 
 	}

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 
 	"github.com/ranon-rat/neural-mines-sweeper/src/brain"
 )
@@ -28,16 +27,11 @@ func main() {
 	mathFuncs := []string{"tanh", "tanh", "tanh"}
 	fmt.Println(bias)
 
-	for i := 0; i < 30; i++ {
-		pos := rand.Intn(len(dataset) - 1)
+	w, bias = brain.Train(0.1, mathFuncs, w, bias, dataset, target, 80)
 
-		v := dataset[pos]
-
-		w, bias = brain.Train(0.5, mathFuncs, w, bias, [][]float64{dataset[pos]}, [][]float64{target[pos]}, 1)
-
+	for i, v := range dataset {
 		output, _ := brain.FeedFoward(v, mathFuncs, w, bias)
-		fmt.Println(v, output, target[pos])
+		fmt.Println(v, output, target[i])
 
 	}
-
 }
