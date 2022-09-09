@@ -18,6 +18,7 @@ func main() {
 	}
 	w, bias := brain.NeuralNetwork([]int{2, 3, 1})
 	mathFuncs := []string{"tanh", "tanh"}
+	fmt.Println(w, "\n", bias, "")
 
 	w, bias = brain.Train(0.5, mathFuncs, w, bias, dataset, target, 80)
 	for i := 0; i < 30; i++ {
