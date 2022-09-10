@@ -12,8 +12,8 @@ import (
 // the training works
 func main() {
 	dataset, expected := core.LoadData("../../data/minessweeper.csv", 1, 9, 1)
-	b := brain.OpenModel("../../neuralNetwork/mines-sweeper.json") //brain.NewNeuralNetwork([]int{9, 36, 32, 1}, []string{"tanh", "tanh", "tanh", "tanh"}, "mines sweeper model , isnt that perfect but it kinda works")
-	b.Train(dataset, expected, 0.2, 500, true)
+	b := brain.NewNeuralNetwork([]int{9, 36, 18, 9, 1}, []string{"sigmoid", "sigmoid", "sigmoid", "sigmoid"}, "mines sweeper model , isnt that perfect but it kinda works")
+	b.Train(dataset, expected, 0.1, 500, true)
 	for i, v := range dataset[:10] {
 		fmt.Printf("expected: %v | output :%v\n", expected[i], b.Predict(v))
 		for j, k := range v {

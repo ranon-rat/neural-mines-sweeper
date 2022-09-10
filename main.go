@@ -18,7 +18,6 @@ func main() {
 
 	b, v := game.CreateABoard(x, y, height, width, 0.2)
 	p := player.NewPlayer(v, nil, nil, "neuralNetwork/mines-sweeper.json", false)
-	p.Brain.Comment = "minessweeper model , isnt perfect"
 
 	for i := 0; !p.Won && i < 10000; i++ {
 		for j := 0; !p.Lose && !p.Won; j++ {

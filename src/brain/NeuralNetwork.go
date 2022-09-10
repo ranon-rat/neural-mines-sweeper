@@ -161,7 +161,7 @@ func (net *NN) Train(dataset, expected [][]float32, learningRate float32, epochs
 
 				wd, bd := net.BackPropagation(layers, expected[j])
 				if i%10 == 0 && logs {
-					err += Cost(expected[j], layers[len(layers)-1]) / float32(len(dataset))
+					err += Cost(expected[j], layers[len(layers)-1])
 
 				}
 				wdList[j], dbList[j] = wd, bd
