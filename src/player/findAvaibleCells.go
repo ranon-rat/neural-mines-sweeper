@@ -5,19 +5,21 @@ import (
 )
 
 // o my fucking god this is fucking trash aaaaa
-func FindAvaibleCells(xMv, yMv int, visibleBoard [][]int) (xyAvaible []core.XY) {
+func FindAvaibleCells(visibleBoard [][]int) (xyAvaible []core.XY) {
 
 	for i, v := range visibleBoard {
 		for j := range v {
-			input := getInput(visibleBoard, i, j)
+			input := GetInput(visibleBoard, i, j, 1)
 
-			if int(input[4]*9) == -1 {
-				s := 0
+			if input[4] == -1 {
+				var s float32 = 0
 				for _, q := range input {
-
-					s += int(q * 9)
+					if q != -1 {
+						continue
+					}
+					s += (q)
 				}
-				if s > -8 {
+				if s > -7 {
 
 					xyAvaible = append(xyAvaible, core.XY{X: j, Y: i})
 				}

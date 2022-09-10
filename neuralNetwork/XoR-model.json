@@ -1,4 +1,5 @@
 { 
+    "comment":"a simple model that i made for testing",
 
     "activation-funcs": [
         "tanh",

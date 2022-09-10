@@ -14,7 +14,7 @@ func (u UniquePosition) Add(val XY) {
 
 }
 
-func GetBiggerIndex(input []float64) (index int) {
+func GetBiggerIndex(input []float32) (index int) {
 	for i := 0; i < len(input)-1; i++ {
 		if input[index] > input[i] {
 			continue
