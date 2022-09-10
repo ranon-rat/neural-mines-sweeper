@@ -138,12 +138,6 @@ func UpdateWeightAndBias(size, learningRate float64, weights [][][]float64, bias
 func Train(learningRate float64, mathFuncs []string, weights [][][]float64, bias, dataset [][]float64, expected [][]float64, epochs int) ([][][]float64, [][]float64) {
 	for i := 0; i < epochs; i++ {
 
-		// I DONT FUCKING NOW WHY ITS NOT WORKING
-		// IT SUPOSE TO WORK
-		// IM MAKING THE SAME FROM A PROJECT THAT I MADE
-		// BUT ITS NOT WORKING FOR SOME REASON
-		//FUck
-
 		for j, v := range dataset {
 			_, layers := FeedFoward(v, mathFuncs, weights, bias)
 

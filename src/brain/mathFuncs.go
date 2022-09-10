@@ -42,8 +42,8 @@ var (
 			"activate":   devRelu,
 		},
 		"tanh": {
-			"derivative": tanh,
-			"activate":   devTanh,
+			"derivative": devTanh,
+			"activate":   tanh,
 		},
 	}
 )
