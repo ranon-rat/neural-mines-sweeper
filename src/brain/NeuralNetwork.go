@@ -13,7 +13,7 @@ type NN struct {
 	Weights         [][][]float32 `json:"weights"          `
 	Bias            [][]float32   `json:"bias"             `
 	ActivationFuncs []string      `json:"activation-funcs" `
-	Comment         []string      `json:"comment" `
+	Comment         string        `json:"comment" `
 }
 
 func NewNeuralNetwork(neuronsPerLayer []int, activationFuncs []string, comment string) NN {
@@ -37,7 +37,7 @@ func NewNeuralNetwork(neuronsPerLayer []int, activationFuncs []string, comment s
 		}
 	}
 
-	return NN{Weights: weights, Bias: bias, ActivationFuncs: activationFuncs}
+	return NN{Weights: weights, Bias: bias, ActivationFuncs: activationFuncs, Comment: comment}
 }
 
 func (net NN) FeedFoward(input []float32) (layers [][]float32) {

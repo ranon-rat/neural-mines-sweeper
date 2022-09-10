@@ -19,7 +19,7 @@ func ShowBoard(board [][]int) {
 		for x := 0; x < len(board[y]); x++ {
 
 			if board[y][x] == bomb || board[y][x] == UndiscoveredCell || board[y][x] == nothing {
-				fmt.Print(map[int]string{bomb: "* ", UndiscoveredCell: "# ", nothing: "  "}[board[y][x]])
+				fmt.Print(Characters[board[y][x]])
 				continue
 			}
 			fmt.Printf("%d ", board[y][x])

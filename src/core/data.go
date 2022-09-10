@@ -41,7 +41,7 @@ func LoadData(filename string, outputLength int, maxValueInput, maxValueOutput f
 	return
 }
 
-func CreateData(filename string, input, output [][]float32, add bool) {
+func CreateData(filename string, input, output [][]float32, add bool, scale float32) {
 	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil || !add {
 		f, _ = os.Create(filename)
@@ -56,7 +56,7 @@ func CreateData(filename string, input, output [][]float32, add bool) {
 
 		}
 		for _, k := range input[i] {
-			row = append(row, fmt.Sprintf("%d", int(k)))
+			row = append(row, fmt.Sprintf("%d", int(k*scale)))
 
 		}
 		csv.Write(row)

@@ -18,6 +18,7 @@ func main() {
 
 	b, v := game.CreateABoard(x, y, height, width, 0.2)
 	p := player.NewPlayer(v, nil, nil, "neuralNetwork/mines-sweeper.json", false)
+	p.Brain.Comment = "minessweeper model , isnt perfect"
 
 	for i := 0; !p.Won && i < 10000; i++ {
 		for j := 0; !p.Lose && !p.Won; j++ {
@@ -32,7 +33,7 @@ func main() {
 		}
 		x, y = 1+rand.Intn(width-1), 1+rand.Intn(height-1)
 
-		core.CreateData("data/minessweeper.csv", p.LogsInput, p.Train(b), true)
+		core.CreateData("data/minessweeper.csv", p.LogsInput, p.Train(b), true, 9)
 
 		b, v = game.CreateABoard(x, y, height, width, 0.2)
 		p.Clear(v)

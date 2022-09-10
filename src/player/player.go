@@ -38,22 +38,19 @@ func (p *Player) Evaluate(board [][]int) {
 	xyAvaible := FindAvaibleCells(p.VisibleBoard)
 	calfAndPos := []CalfAndPos{}
 	for _, v := range xyAvaible {
-
 		// first I get the input from the board
 		input := GetInput(p.VisibleBoard, v.Y, v.X, 9)
 		// then i pass it to the neural network
 		out := p.Brain.Predict(input)
 		// the index 0 is for opening the cell
 		calfAndPos = append(calfAndPos, CalfAndPos{Calf: out[0], Pos: v})
-
 	}
 
 	bigIndx := GetBestPos(calfAndPos)
 	pos := calfAndPos[bigIndx].Pos
-	if !p.SupLearning {
-		p.LogsInput = append(p.LogsInput, GetInput(p.VisibleBoard, pos.Y, pos.X, 9))
-		p.LogsMoves = append(p.LogsMoves, pos)
-	}
+	p.LogsInput = append(p.LogsInput, GetInput(p.VisibleBoard, pos.Y, pos.X, 9))
+	p.LogsMoves = append(p.LogsMoves, pos)
+
 	p.VisibleBoard, p.Lose, p.Won = game.MakeAMove(pos.Y, pos.X, p.VisibleBoard, board)
 
 }
