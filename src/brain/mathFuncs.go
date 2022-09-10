@@ -8,7 +8,7 @@ func relu(x float64) float64 {
 }
 func sigmoid(x float64) float64 {
 
-	return 1 / (1 + math.Exp(-x))
+	return 1 / (1 + math.Exp(x*(-1)))
 
 }
 
@@ -54,19 +54,6 @@ func subtract(x, y []float64) (out []float64) {
 		out[i] = x[i] - y[i]
 	}
 	return
-}
-
-// i already know that the mod function only works for integers
-// but its something that i need for making this
-// and golang dont permit me to do this kind of stuff so I need to do this
-// sorry math bros
-
-func mod(y, x float64) float64 {
-	val := x
-	for val > y {
-		val -= y
-	}
-	return val
 }
 
 func Cost(target []float64, output []float64) float64 {

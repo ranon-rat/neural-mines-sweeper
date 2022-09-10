@@ -1,20 +1,27 @@
 package brain
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
+	"os"
+	"sync"
 	"time"
 )
 
-func NeuralNetwork(neuronsPerLayer []int) (weights [][][]float64, bias [][]float64) {
+type NN struct {
+	Weights         [][][]float64 `json:"weights"`
+	Bias            [][]float64   `json:"bias"`
+	ActivationFuncs []string      `json:"activation-funcs"`
+}
+
+func NewNeuralNetwork(neuronsPerLayer []int, activationFuncs []string) NN {
 	rand.Seed(time.Now().Unix())
-	weights = make([][][]float64, len(neuronsPerLayer)-1)
-	bias = make([][]float64, len(neuronsPerLayer)-1)
+	weights := make([][][]float64, len(neuronsPerLayer)-1)
+	bias := make([][]float64, len(neuronsPerLayer)-1)
 	for i := 0; i < len(neuronsPerLayer)-1; i++ {
 
 		for n := 0; n < neuronsPerLayer[i]; n++ {
-			// i dont need to know the bias for the input but whatever
-
 			weights[i] = append(weights[i], []float64{})
 			for w := 0; w < neuronsPerLayer[i+1]; w++ {
 				weights[i][n] = append(weights[i][n], rand.Float64()-0.5)
@@ -22,70 +29,67 @@ func NeuralNetwork(neuronsPerLayer []int) (weights [][][]float64, bias [][]float
 
 		}
 		for n := 0; n < neuronsPerLayer[i+1]; n++ {
-			// i dont need to know the bias for the input but whatever
 			bias[i] = append(bias[i], rand.Float64()-0.5)
 		}
 	}
 
-	return
+	return NN{Weights: weights, Bias: bias, ActivationFuncs: activationFuncs}
 }
 
-func FeedFoward(input []float64, mathFuncPerLayer []string, weights [][][]float64, bias [][]float64) (output []float64, layers [][]float64) {
-	layers = make([][]float64, len(bias)+1)
+func (net NN) FeedFoward(input []float64) (layers [][]float64) {
+	fmt.Println(len(net.Bias))
+	layers = make([][]float64, len(net.Bias)+1)
 
 	layers[0] = make([]float64, len(input))
 	copy(layers[0], input)
+
 	for l := 0; l < len(layers)-1; l++ {
-		layers[l+1] = make([]float64, len(bias[l]))
+		fmt.Println(l)
+		layers[l+1] = make([]float64, len(net.Bias[l]))
+		copy(layers[l+1], net.Bias[l])
 
 		for n := 0; n < len(layers[l]); n++ {
 
-			for i, w := range weights[l][n] {
+			for i, w := range net.Weights[l][n] {
 				layers[l+1][i] += w * layers[l][n]
 
 			}
 
 		}
+
 		for i := range layers[l+1] {
-			layers[l+1][i] = MathFuncs[mathFuncPerLayer[l]]["activate"](layers[l+1][i] + bias[l][i])
+			layers[l+1][i] = MathFuncs[net.ActivationFuncs[l]]["activate"](layers[l+1][i])
 
 		}
 
 	}
-	output = layers[len(layers)-1]
 	return
 }
 
-// what im doing with my life :weary:
-// how the fuck i did this ?
-func BackPropagation(weights [][][]float64, bias, layers [][]float64, expected []float64, mathFuncPerLayer []string) ([][][]float64, [][]float64) {
-	bd := make([][]float64, len(bias))
-	wd := make([][][]float64, len(weights))
+func (net *NN) BackPropagation(layers [][]float64, expected []float64) ([][][]float64, [][]float64) {
+
+	bd := make([][]float64, len(net.Bias))
+	wd := make([][][]float64, len(net.Weights))
 	errors := make([]float64, len(expected))
 	layer := layers[len(layers)-1]
-	// i get the errors  doing a really simple thing
+	// I dont need to explain this one
 	for i, n := range layer {
 		errors[i] = n - expected[i]
 	}
 
-	for l := len(bias) - 1; l >= 0; l-- {
-		bd[l] = make([]float64, len(bias[l]))
-		wd[l] = make([][]float64, len(weights[l]))
+	for l := len(net.Bias) - 1; l >= 0; l-- {
+		bd[l] = make([]float64, len(net.Bias[l]))
+		wd[l] = make([][]float64, len(net.Weights[l]))
 
-		// okay This supose to get the gradient
-		// I dont really know why its not working properly
-
-		for i := range bias[l] {
-			// so , the gradient its added to the bias
-			// so ,its supose to work
-			bd[l][i] += (errors[i] * MathFuncs[mathFuncPerLayer[l]]["derivative"](layer[i]))
+		for i := range net.Bias[l] {
+			//gradient=errors*dy/dx(fx)(layer[l+1])
+			bd[l][i] += (errors[i] * MathFuncs[net.ActivationFuncs[l]]["derivative"](layer[i]))
 		}
-		// okay , so I multiply layers_lt*gradient
-		//
+		//layer_t *gradient
 		for n := 0; n < len(wd[l]); n++ {
-			wd[l][n] = make([]float64, len(weights[l][n]))
+			wd[l][n] = make([]float64, len(net.Weights[l][n]))
 
-			for i := range weights[l][n] {
+			for i := range net.Weights[l][n] {
 
 				wd[l][n][i] += layers[l][n] * (bd[l][i])
 			}
@@ -97,16 +101,12 @@ func BackPropagation(weights [][][]float64, bias, layers [][]float64, expected [
 
 		layer = layers[l]
 		errorcp := make([]float64, len(layer))
-
-		// i just multiply the errors by the weight of this layer
-		//
+		// errors=weights_t*errors
 		for i := range layer {
-			// this supose to get me the errors of the l-1
-			// but maybe something its not working properly
-			// but I dont really know
+
 			err := 0.0
 			for j := range errors {
-				err += weights[l][i][j] * errors[j]
+				err += net.Weights[l][i][j] * errors[j]
 			}
 			errorcp[i] = err
 		}
@@ -116,43 +116,77 @@ func BackPropagation(weights [][][]float64, bias, layers [][]float64, expected [
 
 	return wd, bd
 }
-func UpdateWeightAndBias(size, learningRate float64, weights [][][]float64, bias [][]float64, weightsGrad [][][]float64, biasGrad [][]float64) ([][][]float64, [][]float64) {
 
-	for l := 0; l < len(weights); l++ {
+// so , this update the weights and bias
+// yeah its really simple
+func (net *NN) UpdateWeightAndBias(size, learningRate float64, weightsGrad [][][]float64, biasGrad [][]float64) {
 
-		for n := 0; n < len(weights[l]); n++ {
+	for l := 0; l < len(net.Weights); l++ {
 
-			for i := range weights[l][n] {
+		for n := 0; n < len(net.Weights[l]); n++ {
 
-				weights[l][n][i] -= ((weightsGrad[l][n][i]) * learningRate) / size
+			for i := range net.Weights[l][n] {
+				// this reduce the error
+
+				net.Weights[l][n][i] -= ((weightsGrad[l][n][i]) * learningRate) / size
 			}
 
 		}
-		for i := range bias[l] {
-			bias[l][i] -= ((biasGrad[l][i]) * learningRate) / size
+		// same for this
+		for i := range net.Bias[l] {
+			net.Bias[l][i] -= (biasGrad[l][i] * learningRate) / size
 		}
 
 	}
 
-	return weights, bias
 }
-func Train(learningRate float64, mathFuncs []string, weights [][][]float64, bias, dataset [][]float64, expected [][]float64, epochs int) ([][][]float64, [][]float64) {
+func (net *NN) Train(activationFuncs []string, weights [][][]float64, bias, dataset, expected [][]float64, learningRate float64, epochs int) {
+	var wg sync.WaitGroup
 	for i := 0; i < epochs; i++ {
 		err := 0.0
+		dbList := make([][][]float64, len(dataset))
+		wdList := make([][][][]float64, len(dataset))
+
 		for j, v := range dataset {
-			out, layers := FeedFoward(v, mathFuncs, weights, bias)
+			wg.Add(1)
+			go func(j int, v []float64) {
+				layers := net.FeedFoward(v)
 
-			wd, bd := BackPropagation(weights, bias, layers, expected[j], mathFuncs)
-			weights, bias = UpdateWeightAndBias(1, learningRate, weights, bias, wd, bd)
-			if i%10 == 0 {
-				err += Cost(expected[j], out)
-			}
-
+				wd, bd := net.BackPropagation(layers, expected[j])
+				if i%10 == 0 {
+					err += Cost(expected[j], layers[len(layers)-1])
+				}
+				wdList[j] = wd
+				dbList[j] = bd
+				wg.Done()
+			}(j, v)
+		}
+		wg.Wait()
+		for j := range dbList {
+			net.UpdateWeightAndBias(float64(len(dataset)), learningRate, wdList[j], dbList[j])
 		}
 		if i%10 == 0 {
 			fmt.Println("| epoch:", i, "| cost:", err/float64(len(dataset)), "|")
 		}
 
 	}
-	return weights, bias
+
+}
+
+// dir+"/"+"name"+".json"
+func (net *NN) SaveModel(name string) {
+
+	f, _ := os.Create(name)
+	json.NewEncoder(f).Encode(net)
+}
+
+func OpenModel(name string) NN {
+	var net NN
+	f, err := os.Open(name)
+	if err != nil {
+		panic(name + ".json doesnt exist ")
+	}
+	json.NewDecoder(f).Decode(&net)
+	return net
+
 }

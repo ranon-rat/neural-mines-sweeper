@@ -1,7 +1,5 @@
 package core
 
-import "math/rand"
-
 type XY struct {
 	X int
 	Y int
@@ -25,12 +23,4 @@ func GetBiggerIndex(input []float64) (index int) {
 		index = i
 	}
 	return
-}
-
-func GenerateRandomString(lenght int) (out string) {
-	for len(out) < lenght {
-		out += string(byte(97 + rand.Intn(26)))
-	}
-	return
-
 }

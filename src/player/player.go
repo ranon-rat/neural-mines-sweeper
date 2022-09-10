@@ -9,20 +9,19 @@ import (
 )
 
 type Player struct {
-	Weights           [][][]float64 `json:"weights"`
-	Biases            [][]float64   `json:"biases"`
-	MathFuncsPerLayer []string      `json:"functions"`
-	VisibleBoard      [][]int       `json:"-"`
-	Lose, Won         bool
+	Brain        brain.NN
+	VisibleBoard [][]int `json:"-"`
+	Lose, Won    bool
 }
 
 //thinking in multiple ways of evaluating this
 //hm maybe the way that i should do this is idk
 func NewPlayer(visibleBoard [][]int) (p Player) {
-	p.Weights, p.Biases = brain.NeuralNetwork([]int{
+	activationFuncs := []string{"sigmoid", "sigmoid", "sigmoid", "sigmoid"}
+
+	p.Brain = brain.NewNeuralNetwork([]int{
 		9, 32, 16, 8, 2,
-	})
-	p.MathFuncsPerLayer = []string{"sigmoid", "sigmoid", "sigmoid", "sigmoid"}
+	}, activationFuncs)
 	p.VisibleBoard = make([][]int, len(visibleBoard))
 	for i, v := range visibleBoard {
 		p.VisibleBoard[i] = make([]int, len(visibleBoard[0]))
@@ -49,9 +48,9 @@ func (p *Player) Evaluate(yMv, xMv int, board [][]int) {
 			// first I get the input from the board
 			input := getInput(p.VisibleBoard, v.Y, v.X)
 			// then i pass it to the neural network
-			output, _ := brain.FeedFoward(input, p.MathFuncsPerLayer, p.Weights, p.Biases)
+			layers := p.Brain.FeedFoward(input)
 			// the index 0 is for opening the cell
-			calfAndPos = append(calfAndPos, CalfAndPos{Calf: output[0], Pos: v})
+			calfAndPos = append(calfAndPos, CalfAndPos{Calf: layers[len(layers)-1][0], Pos: v})
 
 			wg.Done()
 		}(v)

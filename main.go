@@ -6,27 +6,9 @@ import (
 	"github.com/ranon-rat/neural-mines-sweeper/src/brain"
 )
 
-var (
-	dataset = [][]float64{
-		{0, 0},
-		{0, 1},
-		{1, 0},
-		{1, 1},
-	}
-	target = [][]float64{
-		{0},
-		{1},
-		{1},
-		{0},
-	}
-)
-
 func main() {
+	b := brain.OpenModel("neuralNetwork/XoR-model.json")
+	lays := b.FeedFoward([]float64{1, 1})
 
-	w, bias := brain.NeuralNetwork([]int{2, 3, 9, 1})
-	mathFuncs := []string{"sigmoid", "sigmoid", "sigmoid"}
-	fmt.Println(bias)
-
-	w, bias = brain.Train(0.1, mathFuncs, w, bias, dataset, target, 800)
-
+	fmt.Println(lays[len(lays)-1])
 }

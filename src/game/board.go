@@ -23,29 +23,19 @@ func CreateABoard(xMv, yMv, height, width int) (board, visibleBoard [][]int) {
 	for y := 0; y < len(board); y++ {
 
 		for x := 0; x < len(board[y]); x++ {
-			/*
-				###
-				#8#
-				###
-			*/
 
 			if rand.Float64() < 0.2 && !checkLR(y, x, xMv, yMv) && !checkLR(y+1, x, xMv, yMv) && !checkLR(y-1, x, xMv, yMv) {
 				board[y][x] = bomb
 
-				//					winnerBoard[y][x] = undiscoveredCell
-
 				board = addInLeftAndRight(y, x, width, board, false)
 
 				if y > 0 {
-					//board[y-1][x] += bin[board[y-1][x] == bomb]
-					//winnerBoard[y-1][x] = board[y-1][x]
-					//
+
 					board = addInLeftAndRight(y-1, x, width, board, false)
 
 				}
 				if y != height-1 {
-					//board[y+1][x] += bin[board[y+1][x] == bomb]
-					//winnerBoard[y+1][x] = board[y+1][x]
+
 					board = addInLeftAndRight(y+1, x, width, board, false)
 				}
 
