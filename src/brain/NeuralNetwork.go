@@ -1,6 +1,7 @@
 package brain
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -137,13 +138,19 @@ func UpdateWeightAndBias(size, learningRate float64, weights [][][]float64, bias
 }
 func Train(learningRate float64, mathFuncs []string, weights [][][]float64, bias, dataset [][]float64, expected [][]float64, epochs int) ([][][]float64, [][]float64) {
 	for i := 0; i < epochs; i++ {
-
+		err := 0.0
 		for j, v := range dataset {
-			_, layers := FeedFoward(v, mathFuncs, weights, bias)
+			out, layers := FeedFoward(v, mathFuncs, weights, bias)
 
 			wd, bd := BackPropagation(weights, bias, layers, expected[j], mathFuncs)
 			weights, bias = UpdateWeightAndBias(1, learningRate, weights, bias, wd, bd)
+			if i%10 == 0 {
+				err += Cost(expected[j], out)
+			}
 
+		}
+		if i%10 == 0 {
+			fmt.Println("| epoch:", i, "| cost:", err/float64(len(dataset)), "|")
 		}
 
 	}

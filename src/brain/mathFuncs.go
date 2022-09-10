@@ -34,12 +34,12 @@ func devTanh(x float64) float64 {
 var (
 	MathFuncs = map[string]map[string]func(float64) float64{
 		"sigmoid": {
-			"derivative": sigmoid,
-			"activate":   devSigmoid,
+			"derivative": devSigmoid,
+			"activate":   sigmoid,
 		},
 		"relu": {
-			"derivative": relu,
-			"activate":   devRelu,
+			"derivative": devRelu,
+			"activate":   relu,
 		},
 		"tanh": {
 			"derivative": devTanh,

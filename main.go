@@ -24,14 +24,9 @@ var (
 func main() {
 
 	w, bias := brain.NeuralNetwork([]int{2, 3, 9, 1})
-	mathFuncs := []string{"tanh", "tanh", "tanh"}
+	mathFuncs := []string{"sigmoid", "sigmoid", "sigmoid"}
 	fmt.Println(bias)
 
 	w, bias = brain.Train(0.1, mathFuncs, w, bias, dataset, target, 800)
 
-	for i, v := range dataset {
-		output, _ := brain.FeedFoward(v, mathFuncs, w, bias)
-		fmt.Println(v, output, target[i])
-
-	}
 }
