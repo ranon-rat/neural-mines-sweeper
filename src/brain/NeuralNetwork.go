@@ -150,7 +150,7 @@ func (net *NN) UpdateWeightAndBias(size, learningRate float32, weightsGrad [][][
 func (net *NN) Train(dataset, expected [][]float32, learningRate float32, epochs int, logs bool) {
 	var wg sync.WaitGroup
 	for i := 0; i < epochs; i++ {
-		var err float32 = 0.0
+		var acc, err float32 = 0.0, 0.0
 		dbList := make([][][]float32, len(dataset))
 		wdList := make([][][][]float32, len(dataset))
 
@@ -161,8 +161,8 @@ func (net *NN) Train(dataset, expected [][]float32, learningRate float32, epochs
 
 				wd, bd := net.BackPropagation(layers, expected[j])
 				if i%10 == 0 && logs {
-					err += Cost(expected[j], layers[len(layers)-1])
-
+					acc += Accuracy(expected[j], layers[len(layers)-1]) / float32(len(dataset))
+					err += Cost(expected[j], layers[len(layers)-1]) / float32(len(dataset))
 				}
 				wdList[j], dbList[j] = wd, bd
 				dbList[j] = bd
@@ -175,7 +175,7 @@ func (net *NN) Train(dataset, expected [][]float32, learningRate float32, epochs
 		}
 		if i%10 == 0 && logs {
 
-			fmt.Printf("| cost: %9.5f |epochs %d\n", err, i)
+			fmt.Printf("| cost: %9.5f | Accuracy: %9.5f  |epochs %d\n", err, acc, i)
 		}
 
 	}

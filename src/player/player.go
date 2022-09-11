@@ -60,7 +60,7 @@ func (p *Player) Train(board [][]int) [][]float32 {
 		expected = append(expected, []float32{map[bool]float32{true: 0, false: 1}[board[v.Y][v.X] == 9]})
 
 	}
-	p.Brain.Train(p.LogsInput, expected, 0.2, len(expected)*4, false)
+	p.Brain.Train(p.LogsInput, expected, 0.25, 50, false)
 	return expected
 
 }

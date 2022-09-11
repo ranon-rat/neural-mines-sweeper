@@ -48,6 +48,24 @@ var (
 	}
 )
 
+func Accuracy(target []float32, output []float32) float32 {
+	acc := 0
+	for i := range target {
+		if target[i] == 0 {
+			if math.Abs(float64(target[i]-output[i])) < 0.3 {
+				acc++
+
+			}
+		} else {
+			if math.Abs(float64(output[i]-target[i])) < 0.3 {
+				acc++
+
+			}
+		}
+	}
+	return float32(acc) / float32(len(target))
+}
+
 func Cost(target []float32, output []float32) float32 {
 	err := 0.0
 	for i := range target {
