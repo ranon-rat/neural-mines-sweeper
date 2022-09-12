@@ -1,6 +1,9 @@
 package player
 
-import "github.com/ranon-rat/neural-mines-sweeper/src/core"
+import (
+	"github.com/ranon-rat/neural-mines-sweeper/src/core"
+	"github.com/ranon-rat/neural-mines-sweeper/src/game"
+)
 
 type CalfAndPos struct {
 	Pos  core.XY
@@ -28,11 +31,11 @@ func getLAndR(visibleBoard [][]int, y, x, row int, out []float32, scale float32)
 }
 func GetInput(visibleBoard [][]int, y, x int, scale float32) (out []float32) {
 	out = []float32{
-		-1 / scale, -1 / scale, -1 / scale, -1 / scale, -1 / scale,
-		-1 / scale, -1 / scale, -1 / scale, -1 / scale, -1 / scale,
-		-1 / scale, -1 / scale, -1 / scale, -1 / scale, -1 / scale,
-		-1 / scale, -1 / scale, -1 / scale, -1 / scale, -1 / scale,
-		-1 / scale, -1 / scale, -1 / scale, -1 / scale, -1 / scale,
+		game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale,
+		game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale,
+		game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale,
+		game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale,
+		game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale,
 	}
 	if y-1 > 0 {
 		out = getLAndR(visibleBoard, y-2, x, 0, out, scale)

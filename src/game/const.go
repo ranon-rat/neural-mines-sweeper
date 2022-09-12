@@ -1,11 +1,12 @@
 package game
 
+// sorry but i want to use relu
 const (
-	bomb             = 9
-	UndiscoveredCell = -1
-	nothing          = 0
+	Bomb             = 10
+	UndiscoveredCell = 0
+	Nothing          = 1
 )
 
 var (
-	Characters = map[int]string{bomb: "* ", UndiscoveredCell: "# ", nothing: "  "}
+	Characters = map[int]string{Bomb: "* ", UndiscoveredCell: "# ", Nothing: "  "}
 )

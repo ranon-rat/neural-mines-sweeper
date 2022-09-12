@@ -8,7 +8,7 @@ import (
 
 type Player struct {
 	Brain                  brain.NN
-	VisibleBoard           [][]int `json:"-"`
+	VisibleBoard           [][]int
 	Lose, Won, SupLearning bool
 
 	LogsInput [][]float32
@@ -20,8 +20,8 @@ type Player struct {
 func NewPlayer(visibleBoard [][]int, activationFuncs []string, hiddenLayersLength []int, modelFile string, supLearning bool) (p Player) {
 	p.SupLearning = supLearning
 	if modelFile == "" {
-		hiddenLayersLength = append(hiddenLayersLength, 1)
-		layers := append([]int{9}, hiddenLayersLength...)
+		hiddenLayersLength = append(hiddenLayersLength, 2)
+		layers := append([]int{25}, hiddenLayersLength...)
 		p.Brain = brain.NewNeuralNetwork(layers, activationFuncs, "a simple model lol")
 	} else {
 		p.Brain = brain.OpenModel(modelFile)
@@ -37,18 +37,26 @@ func NewPlayer(visibleBoard [][]int, activationFuncs []string, hiddenLayersLengt
 func (p *Player) Evaluate(board [][]int) {
 	xyAvaible := FindAvaibleCells(p.VisibleBoard)
 	calfAndPos := []CalfAndPos{}
+	itsFine := []CalfAndPos{}
 	for _, v := range xyAvaible {
 		// first I get the input from the board
-		input := GetInput(p.VisibleBoard, v.Y, v.X, 9)
+		input := GetInput(p.VisibleBoard, v.Y, v.X, game.Bomb-1)
 		// then i pass it to the neural network
 		out := p.Brain.Predict(input)
 		// the index 0 is for opening the cell
-		calfAndPos = append(calfAndPos, CalfAndPos{Calf: out[0], Pos: v})
+		calfAndPos = append(calfAndPos, CalfAndPos{Calf: out[1], Pos: v})
+		if core.GetBiggerIndex(out) == 1 {
+			itsFine = append(calfAndPos, CalfAndPos{Calf: out[1], Pos: v})
+		}
+
+	}
+	if len(itsFine) > 0 {
+		calfAndPos = itsFine
 	}
 
 	bigIndx := GetBestPos(calfAndPos)
 	pos := calfAndPos[bigIndx].Pos
-	p.LogsInput = append(p.LogsInput, GetInput(p.VisibleBoard, pos.Y, pos.X, 9))
+	p.LogsInput = append(p.LogsInput, GetInput(p.VisibleBoard, pos.Y, pos.X, game.Bomb-1))
 	p.LogsMoves = append(p.LogsMoves, pos)
 
 	p.VisibleBoard, p.Lose, p.Won = game.MakeAMove(pos.Y, pos.X, p.VisibleBoard, board)
@@ -57,10 +65,11 @@ func (p *Player) Evaluate(board [][]int) {
 func (p *Player) Train(board [][]int) [][]float32 {
 	expected := [][]float32{}
 	for _, v := range p.LogsMoves {
-		expected = append(expected, []float32{map[bool]float32{true: 0, false: 1}[board[v.Y][v.X] == 9]})
+
+		expected = append(expected, map[bool][]float32{true: {1, 0}, false: {0, 1}}[board[v.Y][v.X] == game.Bomb])
 
 	}
-	p.Brain.Train(p.LogsInput, expected, 0.25, 50, false)
+	p.Brain.Train(p.LogsInput, expected, 0.000002, 40, false)
 	return expected
 
 }

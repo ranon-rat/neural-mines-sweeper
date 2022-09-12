@@ -4,7 +4,7 @@ import "github.com/ranon-rat/neural-mines-sweeper/src/core"
 
 func MakeAMove(y, x int, visibleBoard, board [][]int) (finalBoard [][]int, lose, wins bool) {
 	cell := board[y][x]
-	lose = cell == bomb
+	lose = cell == Bomb
 
 	visibleBoard[y][x] = cell
 	if !lose {
@@ -23,7 +23,7 @@ func ThePlayerWins(visibleBoard, board [][]int) bool {
 	cells := 0
 	for y := 0; y < len(visibleBoard); y++ {
 		for x := 0; x < len(visibleBoard[y]); x++ {
-			if board[y][x] == 9 && visibleBoard[y][x] != board[y][x] {
+			if board[y][x] == Bomb && visibleBoard[y][x] != board[y][x] {
 				cells++
 				continue
 

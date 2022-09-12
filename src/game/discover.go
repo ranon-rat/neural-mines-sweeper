@@ -7,7 +7,7 @@ func discover(y, x int, discoveredPos core.UniquePosition, visibleBoard, board [
 	discCells = discoveredPos
 	discCells.Add(core.XY{X: x, Y: y})
 	finalBoard[y][x] = board[y][x]
-	if board[y][x] > 0 {
+	if board[y][x] > Nothing {
 		return
 	}
 
@@ -35,7 +35,7 @@ func discoverLAndR(y, x int, discoveredPos core.UniquePosition, visibleBoard, bo
 	finalBoard[y][x] = board[y][x]
 	discCells = discoveredPos
 	discCells.Add(core.XY{X: x, Y: y})
-	if board[y][x] > 0 {
+	if board[y][x] > Nothing {
 		return
 	}
 	if x != 0 {

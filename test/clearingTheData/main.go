@@ -12,7 +12,7 @@ func main() {
 			newDataset = append(newDataset, dataset[j])
 			newExpected = append(newExpected, v)
 			bomb--
-		} else if v[0] == 0 {
+		} else if v[0] == 0 && bomb == 0 {
 			newDataset = append(newDataset, dataset[j])
 			newExpected = append(newExpected, v)
 			bomb++

@@ -2,6 +2,7 @@ package player
 
 import (
 	"github.com/ranon-rat/neural-mines-sweeper/src/core"
+	"github.com/ranon-rat/neural-mines-sweeper/src/game"
 )
 
 func getArrLAndR(visibleBoard [][]int, y, x, row int, out []int) []int {
@@ -20,9 +21,9 @@ func getArrLAndR(visibleBoard [][]int, y, x, row int, out []int) []int {
 func GetArround(visibleBoard [][]int, y, x int) (out []int) {
 
 	out = []int{
-		-1, -1, -1,
-		-1, -1, -1,
-		-1, -1, -1,
+		game.UndiscoveredCell, game.UndiscoveredCell, game.UndiscoveredCell,
+		game.UndiscoveredCell, game.UndiscoveredCell, game.UndiscoveredCell,
+		game.UndiscoveredCell, game.UndiscoveredCell, game.UndiscoveredCell,
 	}
 
 	out = getArrLAndR(visibleBoard, y, x, 1, out)
@@ -46,18 +47,17 @@ func FindAvaibleCells(visibleBoard [][]int) (xyAvaible []core.XY) {
 	for i, v := range visibleBoard {
 		for j := range v {
 			input := GetArround(visibleBoard, i, j)
-			if input[4] == -1 {
+			if input[4] == game.UndiscoveredCell {
 				cells = append(cells, core.XY{X: j, Y: i})
 
 				s := 0
 				for _, q := range input {
 
-					if q != -1 {
-						continue
+					if q == game.UndiscoveredCell {
+						s++
 					}
-					s += q
 				}
-				if s > -8 {
+				if s < 7 {
 
 					xyAvaible = append(xyAvaible, core.XY{X: j, Y: i})
 				}

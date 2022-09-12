@@ -3,8 +3,10 @@ package core
 import (
 	"encoding/csv"
 	"fmt"
+	"math/rand"
 	"os"
 	"strconv"
+	"time"
 )
 
 // first output and then the inpu
@@ -19,23 +21,26 @@ func LoadData(filename string, outputLength int, maxValueInput, maxValueOutput f
 	if err != nil {
 		panic(err)
 	}
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(records), func(i, j int) { records[i], records[j] = records[j], records[i] })
 	for _, row := range records {
 		inputRow := []float32{}
-		outputRow := []float32{}
+
+		out := make([]float32, int(maxValueOutput+1))
 		for i, v := range row {
 			s, _ := strconv.ParseFloat(v, 32)
 
-			if i < (outputLength) {
-				outputRow = append(outputRow, float32(s)/maxValueOutput)
-
+			if i < outputLength {
+				out[int(s)] = 1
 				continue
 			}
+
 			inputRow = append(inputRow, float32(s)/maxValueInput)
 
 		}
 
 		input = append(input, inputRow)
-		expected = append(expected, outputRow)
+		expected = append(expected, out)
 	}
 
 	return
@@ -51,10 +56,9 @@ func CreateData(filename string, input, output [][]float32, add bool, scale floa
 	defer f.Close()
 	for i := range input {
 		row := []string{}
-		for _, k := range output[i] {
-			row = append(row, fmt.Sprintf("%d", int(k)))
 
-		}
+		row = append(row, fmt.Sprintf("%d", GetBiggerIndex(output[i])))
+
 		for _, k := range input[i] {
 			row = append(row, fmt.Sprintf("%d", int(k*scale)))
 

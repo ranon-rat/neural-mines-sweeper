@@ -51,7 +51,6 @@ func (net NN) FeedFoward(input []float32) (layers [][]float32) {
 		copy(layers[l+1], net.Bias[l])
 		// layer*weight
 		for n := 0; n < len(layers[l]); n++ {
-
 			for i, w := range net.Weights[l][n] {
 				layers[l+1][i] += w * layers[l][n]
 
@@ -162,7 +161,7 @@ func (net *NN) Train(dataset, expected [][]float32, learningRate float32, epochs
 				wd, bd := net.BackPropagation(layers, expected[j])
 				if i%10 == 0 && logs {
 					acc += Accuracy(expected[j], layers[len(layers)-1]) / float32(len(dataset))
-					err += Cost(expected[j], layers[len(layers)-1]) / float32(len(dataset))
+					err += Cost(expected[j], layers[len(layers)-1])
 				}
 				wdList[j], dbList[j] = wd, bd
 				dbList[j] = bd

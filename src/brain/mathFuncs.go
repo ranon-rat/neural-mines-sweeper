@@ -1,6 +1,8 @@
 package brain
 
-import "math"
+import (
+	"math"
+)
 
 func relu(x float32) float32 {
 	return float32(math.Max(0, float64(x)))
@@ -50,20 +52,13 @@ var (
 
 func Accuracy(target []float32, output []float32) float32 {
 	acc := 0
-	for i := range target {
-		if target[i] == 0 {
-			if math.Abs(float64(target[i]-output[i])) < 0.3 {
-				acc++
-
-			}
-		} else {
-			if math.Abs(float64(output[i]-target[i])) < 0.3 {
-				acc++
-
-			}
+	for i := range output {
+		if (math.Round(float64(target[i]))) == (math.Round(float64(output[i]))) {
+			acc++
 		}
 	}
-	return float32(acc) / float32(len(target))
+
+	return float32(acc) / float32(len(output))
 }
 
 func Cost(target []float32, output []float32) float32 {
