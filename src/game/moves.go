@@ -2,6 +2,8 @@ package game
 
 import "github.com/ranon-rat/neural-mines-sweeper/src/core"
 
+// just making a move and be sure that you doesnt lose
+// func-> board,lose,wins
 func MakeAMove(y, x int, visibleBoard, board [][]int) (finalBoard [][]int, lose, wins bool) {
 	cell := board[y][x]
 	lose = cell == Bomb

@@ -29,6 +29,11 @@ func getLAndR(visibleBoard [][]int, y, x, row int, out []float32, scale float32)
 	return out
 
 }
+
+// its sjust a way of getting the output
+// i know that this isnt beautiful and optimize
+// way of doing this
+// but im to lazy for implementing something else
 func GetInput(visibleBoard [][]int, y, x int, scale float32) (out []float32) {
 	out = []float32{
 		game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale, game.UndiscoveredCell / scale,
@@ -57,6 +62,7 @@ func GetInput(visibleBoard [][]int, y, x int, scale float32) (out []float32) {
 
 }
 
+// it just get me the bigger value
 func GetBestPos(a []CalfAndPos) (index int) {
 	for i := 0; i < len(a); i++ {
 		if a[index].Calf > a[i].Calf {

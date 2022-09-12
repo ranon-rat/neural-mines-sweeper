@@ -45,30 +45,38 @@ func (p *Player) Evaluate(board [][]int) {
 		out := p.Brain.Predict(input)
 		// the index 0 is for opening the cell
 		calfAndPos = append(calfAndPos, CalfAndPos{Calf: out[1], Pos: v})
+		// 1 open obviously
 		if core.GetBiggerIndex(out) == 1 {
 			itsFine = append(calfAndPos, CalfAndPos{Calf: out[1], Pos: v})
 		}
 
 	}
+	// i just see if the list "itsfine"  is empty , only for not having some weird errors
 	if len(itsFine) > 0 {
 		calfAndPos = itsFine
 	}
 
 	bigIndx := GetBestPos(calfAndPos)
 	pos := calfAndPos[bigIndx].Pos
-	p.LogsInput = append(p.LogsInput, GetInput(p.VisibleBoard, pos.Y, pos.X, game.Bomb-1))
-	p.LogsMoves = append(p.LogsMoves, pos)
-
+	if !p.SupLearning {
+		p.LogsInput = append(p.LogsInput, GetInput(p.VisibleBoard, pos.Y, pos.X, game.Bomb-1))
+		p.LogsMoves = append(p.LogsMoves, pos)
+	}
 	p.VisibleBoard, p.Lose, p.Won = game.MakeAMove(pos.Y, pos.X, p.VisibleBoard, board)
 
 }
+
+// the board its for knowing the predictions, IM NOT GOING TO FUCKING SAVE THE FUCKING LAYERS
 func (p *Player) Train(board [][]int) [][]float32 {
 	expected := [][]float32{}
 	for _, v := range p.LogsMoves {
+		// because I need to have a double output i need to do this
 
 		expected = append(expected, map[bool][]float32{true: {1, 0}, false: {0, 1}}[board[v.Y][v.X] == game.Bomb])
 
 	}
+	// for some reason that i detected i need to use a really low learning rate for the training process
+	// maybe you can search for that
 	p.Brain.Train(p.LogsInput, expected, 0.000002, 40, false)
 	return expected
 

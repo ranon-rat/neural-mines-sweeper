@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// if you want to visualize the board
 func ShowBoard(board [][]int) {
 	fmt.Print(" ")
 	for i := 0; i < len(board[0]); i++ {
