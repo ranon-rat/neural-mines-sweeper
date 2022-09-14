@@ -1,7 +1,7 @@
 # neural-mines-sweeper
 Its a really simple project made with love.
 
-I tried to generalize it for using it for other projects , if you want , you can copy the machine learning stuff(obviously I would be grateful if you give me the credits) it but you need to keep in mind that this isnt the best. And maybe later I will adapt it for a genetic algorithm.
+I tried to generalize it for using it for other projects , if you want , you can copy the machine learning stuff(obviously I would be grateful if you give me the credits) , but you need to keep in mind that this isnt the best. And maybe later I will adapt it for a genetic algorithm.
 
 
 ## how it works
