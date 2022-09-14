@@ -22,7 +22,7 @@ func main() {
 
 	x, y := rand.Intn(width-1), rand.Intn(height-1)
 	b, v := game.CreateABoard(x, y, height, width, 0.2)
-	p := player.NewPlayer(v, nil, nil, model, false)
+	p := player.NewPlayer(v, nil, nil, "neuralNetwork/mines-sweeper.json", false)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
