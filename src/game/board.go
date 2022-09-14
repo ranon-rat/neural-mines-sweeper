@@ -25,7 +25,7 @@ func CreateABoard(xMv, yMv, height, width int, weirdness float64) (board, visibl
 		for x := 0; x < len(board[y]); x++ {
 
 			if rand.Float64() <= weirdness && !checkLR(y, x, xMv, yMv) && !checkLR(y+1, x, xMv, yMv) && !checkLR(y-1, x, xMv, yMv) {
-
+				board[y][x] = Bomb
 				board = addInLeftAndRight(y, x, width, board, false)
 
 				if y > 0 {
