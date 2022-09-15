@@ -9,7 +9,7 @@ import (
 
 var bin = map[bool]int{false: 1, true: 0}
 
-func CreateABoard(xMv, yMv, height, width int, weirdness float64) (board, visibleBoard [][]int) {
+func CreateABoard(bombs, xMv, yMv, height, width int) (board, visibleBoard [][]int) {
 	rand.Seed(time.Now().Unix())
 	for y := 0; y < height; y++ {
 		visibleBoard = append(visibleBoard, []int{})
@@ -20,26 +20,30 @@ func CreateABoard(xMv, yMv, height, width int, weirdness float64) (board, visibl
 			visibleBoard[y] = append(visibleBoard[y], UndiscoveredCell)
 		}
 	}
-	for y := 0; y < len(board); y++ {
+	b := 0
+	for b < bombs {
+		for y := 0; y < len(board); y++ {
 
-		for x := 0; x < len(board[y]); x++ {
+			for x := 0; x < len(board[y]); x++ {
 
-			if rand.Float64() <= weirdness && !checkLR(y, x, xMv, yMv) && !checkLR(y+1, x, xMv, yMv) && !checkLR(y-1, x, xMv, yMv) && !checkLR(y-1, x-1, xMv, yMv) && !checkLR(y+1, x+1, xMv, yMv) {
-				board[y][x] = Bomb
-				board = addInLeftAndRight(y, x, width, board, false)
+				if b < bombs && rand.Float64() <= 1/(float64(width)*float64(height)) && !checkLR(y, x, xMv, yMv) && !checkLR(y+1, x, xMv, yMv) && !checkLR(y-1, x, xMv, yMv) && !checkLR(y-1, x-1, xMv, yMv) && !checkLR(y+1, x+1, xMv, yMv) {
+					board[y][x] = Bomb
+					b++
+					board = addInLeftAndRight(y, x, width, board, false)
 
-				if y > 0 {
+					if y > 0 {
 
-					board = addInLeftAndRight(y-1, x, width, board, false)
+						board = addInLeftAndRight(y-1, x, width, board, false)
 
-				}
-				if y != height-1 {
+					}
+					if y != height-1 {
 
-					board = addInLeftAndRight(y+1, x, width, board, false)
+						board = addInLeftAndRight(y+1, x, width, board, false)
+					}
+
 				}
 
 			}
-
 		}
 	}
 	visibleBoard[yMv][xMv] = board[yMv][xMv]

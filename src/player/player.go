@@ -7,18 +7,18 @@ import (
 )
 
 type Player struct {
-	Brain                  brain.NN
-	VisibleBoard           [][]int
-	Lose, Won, SupLearning bool
+	Brain               brain.NN
+	VisibleBoard        [][]int
+	Lose, Won, saveData bool
 
-	LogsInput [][]float32
-	LogsMoves []core.XY
+	LogsInput    [][]float32
+	LogsExpected [][]float32
 }
 
 //thinking in multiple ways of evaluating this
 //hm maybe the way that i should do this is idk
-func NewPlayer(visibleBoard [][]int, activationFuncs []string, hiddenLayersLength []int, modelFile string, supLearning bool) (p Player) {
-	p.SupLearning = supLearning
+func NewPlayer(visibleBoard [][]int, activationFuncs []string, hiddenLayersLength []int, modelFile string, save bool) (p Player) {
+	p.saveData = save
 	if modelFile == "" {
 		hiddenLayersLength = append(hiddenLayersLength, 2)
 		layers := append([]int{25}, hiddenLayersLength...)
@@ -46,7 +46,14 @@ func (p *Player) Evaluate(board [][]int) {
 		// the index 0 is for opening the cell
 		calfAndPos = append(calfAndPos, CalfAndPos{Calf: out[1], Pos: v})
 		// 1 open obviously
-		p.Brain.Train([][]float32{GetInput(p.VisibleBoard, v.Y, v.X, game.Bomb-1)}, [][]float32{map[bool][]float32{true: {1, 0}, false: {0, 1}}[board[v.Y][v.X] == game.Bomb]}, 0.01, 1, false)
+		if p.saveData {
+			p.LogsInput = append(p.LogsInput, input)
+			p.LogsExpected = append(p.LogsExpected, map[bool][]float32{true: {1, 0}, false: {0, 1}}[board[v.Y][v.X] == game.Bomb])
+		} else {
+			p.Brain.Train([][]float32{input},
+				[][]float32{map[bool][]float32{true: {1, 0}, false: {0, 1}}[board[v.Y][v.X] == game.Bomb]}, 0.00094, 1, false)
+
+		}
 
 		if core.GetBiggerIndex(out) == 1 {
 			itsFine = append(calfAndPos, CalfAndPos{Calf: out[1], Pos: v})
@@ -60,32 +67,22 @@ func (p *Player) Evaluate(board [][]int) {
 
 	bigIndx := GetBestPos(calfAndPos)
 	pos := calfAndPos[bigIndx].Pos
-	if !p.SupLearning {
-		p.LogsInput = append(p.LogsInput, GetInput(p.VisibleBoard, pos.Y, pos.X, game.Bomb-1))
-		p.LogsMoves = append(p.LogsMoves, pos)
-	}
+
 	p.VisibleBoard, p.Lose, p.Won = game.MakeAMove(pos.Y, pos.X, p.VisibleBoard, board)
 
 }
 
 // the board its for knowing the predictions, IM NOT GOING TO FUCKING SAVE THE FUCKING LAYERS
-func (p *Player) Train(board [][]int) [][]float32 {
-	expected := [][]float32{}
-	for _, v := range p.LogsMoves {
-		// because I need to have a double output i need to do this
+func (p *Player) Train() {
 
-		expected = append(expected, map[bool][]float32{true: {1, 0}, false: {0, 1}}[board[v.Y][v.X] == game.Bomb])
-
-	}
 	// for some reason that i detected i need to use a really low learning rate for the training process
 	// maybe you can search for that
-	p.Brain.Train(p.LogsInput, expected, 0.005, 1, false)
-	return expected
+	p.Brain.Train(p.LogsInput, p.LogsExpected, 0.0001, 1, false)
 
 }
 
 func (p *Player) Clear(visibleBoard [][]int) {
-	p.LogsMoves = []core.XY{}
+	p.LogsExpected = [][]float32{}
 	p.LogsInput = [][]float32{}
 	p.VisibleBoard = visibleBoard
 	p.Lose = false
