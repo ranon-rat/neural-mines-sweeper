@@ -181,7 +181,6 @@ func (net *NN) Train(dataset, expected [][]float32, learningRate float32, epochs
 				}
 				// i just add new stuff and that for training
 				wdList[j], dbList[j] = wd, bd
-				dbList[j] = bd
 				// then it finish
 				wg.Done()
 			}(j, v)
