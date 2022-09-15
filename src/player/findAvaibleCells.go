@@ -58,7 +58,7 @@ func FindAvaibleCells(visibleBoard [][]int) (xyAvaible []core.XY) {
 					}
 				}
 				// i just see how many cells are opened around it
-				if s < 9 {
+				if s < 7 {
 
 					xyAvaible = append(xyAvaible, core.XY{X: j, Y: i})
 				}

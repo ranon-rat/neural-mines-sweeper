@@ -15,8 +15,8 @@ func main() {
 	dataset, expected := core.LoadData("../../data/minessweeper.csv", 1, game.Bomb-1, 1)
 	model := "../../neuralNetwork/mines-sweeper.json"
 
-	b := brain.NewNeuralNetwork([]int{25, 16, 16, 16, 2}, []string{"tanh", "tanh", "tanh", "tanh"}, "more layers")
-	b.Train(dataset, expected, 0.3, 1000, true)
+	b := brain.OpenModel(model)
+	b.Train(dataset, expected, 0.01, 100, true)
 	for j := 0; j < 5; j++ {
 		i := rand.Intn(len(dataset))
 		v := dataset[i]

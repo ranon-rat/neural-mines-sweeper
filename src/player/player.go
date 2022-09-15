@@ -46,6 +46,8 @@ func (p *Player) Evaluate(board [][]int) {
 		// the index 0 is for opening the cell
 		calfAndPos = append(calfAndPos, CalfAndPos{Calf: out[1], Pos: v})
 		// 1 open obviously
+		p.Brain.Train([][]float32{GetInput(p.VisibleBoard, v.Y, v.X, game.Bomb-1)}, [][]float32{map[bool][]float32{true: {1, 0}, false: {0, 1}}[board[v.Y][v.X] == game.Bomb]}, 0.01, 1, false)
+
 		if core.GetBiggerIndex(out) == 1 {
 			itsFine = append(calfAndPos, CalfAndPos{Calf: out[1], Pos: v})
 		}
@@ -58,10 +60,10 @@ func (p *Player) Evaluate(board [][]int) {
 
 	bigIndx := GetBestPos(calfAndPos)
 	pos := calfAndPos[bigIndx].Pos
-	if !p.SupLearning {
-		p.LogsInput = append(p.LogsInput, GetInput(p.VisibleBoard, pos.Y, pos.X, game.Bomb-1))
-		p.LogsMoves = append(p.LogsMoves, pos)
-	}
+	//if !p.SupLearning {
+	//	p.LogsInput = append(p.LogsInput, GetInput(p.VisibleBoard, pos.Y, pos.X, game.Bomb-1))
+	//	p.LogsMoves = append(p.LogsMoves, pos)
+	//}
 	p.VisibleBoard, p.Lose, p.Won = game.MakeAMove(pos.Y, pos.X, p.VisibleBoard, board)
 
 }
@@ -77,7 +79,7 @@ func (p *Player) Train(board [][]int) [][]float32 {
 	}
 	// for some reason that i detected i need to use a really low learning rate for the training process
 	// maybe you can search for that
-	p.Brain.Train(p.LogsInput, expected, 0.000002, 40, false)
+	p.Brain.Train(p.LogsInput, expected, 0.01, 1, false)
 	return expected
 
 }

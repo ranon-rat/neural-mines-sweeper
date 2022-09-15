@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -57,7 +58,6 @@ func (net NN) FeedFoward(input []float32) (layers [][]float32) {
 
 	for l := 0; l < len(layers)-1; l++ {
 		layers[l+1] = make([]float32, len(net.Bias[l]))
-		copy(layers[l+1], net.Bias[l])
 		// layer*weight
 		for n := 0; n < len(layers[l]); n++ {
 			for i, w := range net.Weights[l][n] {
@@ -68,7 +68,7 @@ func (net NN) FeedFoward(input []float32) (layers [][]float32) {
 		}
 		//layer(l+1)=f(bias)
 		for i := range layers[l+1] {
-			layers[l+1][i] = MathFuncs[net.ActivationFuncs[l]]["activate"](layers[l+1][i])
+			layers[l+1][i] = MathFuncs[net.ActivationFuncs[l]]["activate"](layers[l+1][i] + net.Bias[l][i])
 
 		}
 
@@ -157,42 +157,41 @@ func (net *NN) UpdateWeightAndBias(size, learningRate float32, weightsGrad [][][
 func (net *NN) Train(dataset, expected [][]float32, learningRate float32, epochs int, logs bool) {
 	// so , this works for making stuff much faster
 	// concurrence baby
-	//	var wg sync.WaitGroup
+	var wg sync.WaitGroup
 
 	for i := 0; i < epochs; i++ {
 		var acc, err float32 = 0.0, 0.0
 		// so , this updating the weight and bias
-		//dbList := make([][][]float32, len(dataset))
-		//wdList := make([][][][]float32, len(dataset))
+		dbList := make([][][]float32, len(dataset))
+		wdList := make([][][][]float32, len(dataset))
 
 		for j, v := range dataset {
 			// just add a new function for execution
-			//	wg.Add(1)
-			//
-			//	go func(j int, v []float32) {
-			layers := net.FeedFoward(v)
+			wg.Add(1)
 
-			wd, bd := net.BackPropagation(layers, expected[j])
-			net.UpdateWeightAndBias(1, learningRate/float32(len(dataset)), wd, bd)
-			// I dont need to calculate the cost and accuracy in each epoch
-			// so this is for avoiding any kind of shit
-			if i%10 == 0 && logs {
-				acc += Accuracy(expected[j], layers[len(layers)-1]) / float32(len(dataset))
-				err += Cost(expected[j], layers[len(layers)-1])
-			}
-			// i just add new stuff and that for training
-			//		wdList[j], dbList[j] = wd, bd
-			//		dbList[j] = bd
-			//		// then it finish
-			//		wg.Done()
-			//	}(j, v)
+			go func(j int, v []float32) {
+				layers := net.FeedFoward(v)
+
+				wd, bd := net.BackPropagation(layers, expected[j])
+				// I dont need to calculate the cost and accuracy in each epoch
+				// so this is for avoiding any kind of shit
+				if i%10 == 0 && logs {
+					acc += Accuracy(expected[j], layers[len(layers)-1]) / float32(len(dataset))
+					err += Cost(expected[j], layers[len(layers)-1])
+				}
+				// i just add new stuff and that for training
+				wdList[j], dbList[j] = wd, bd
+				dbList[j] = bd
+				// then it finish
+				wg.Done()
+			}(j, v)
 		}
 		// after all functions finish to execute it continues
-		//wg.Wait()
-		//for j := range dbList {
-		//with this i get the gradient of each input, so each gradient have the same gradient
-		// net.UpdateWeightAndBias(float32(len(dataset)), learningRate, wdList[j], dbList[j])
-		//}
+		wg.Wait()
+		for j := range dbList {
+			// with this i get the gradient of each input, so each gradient have the same gradient
+			net.UpdateWeightAndBias(float32(len(dataset)), learningRate, wdList[j], dbList[j])
+		}
 		if i%10 == 0 && logs {
 
 			fmt.Printf("| cost: %9.5f | Accuracy: %9.5f  |epochs %d\n", err, acc, i)
