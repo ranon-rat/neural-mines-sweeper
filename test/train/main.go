@@ -13,7 +13,7 @@ import (
 // the training works
 func main() {
 	dataset, expected := core.LoadData("../../data/minessweeper.csv", 1, game.Bomb-1, 1)
-	model := "../../neuralNetwork/mines-sweeper.json"
+	model := "../../neuralNetwork/mines-sweeper-self-trained.json"
 
 	b := brain.OpenModel(model)
 	b.Train(dataset, expected, 0.01, 100, true)

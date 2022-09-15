@@ -17,11 +17,11 @@ var (
 
 // this model is trained
 func main() {
-	width, height := 15, 10
+	width, height := 9, 9
 
 	x, y := rand.Intn(width-1), rand.Intn(height-1)
-	b, v := game.CreateABoard(x, y, height, width, 0.1)
-	p := player.NewPlayer(v, nil, nil, model, false)
+	b, v := game.CreateABoard(x, y, height, width, 0.11)
+	p := player.NewPlayer(v, nil, nil, model, true)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -44,14 +44,7 @@ func main() {
 
 		}
 		x, y = rand.Intn(width), rand.Intn(height)
-		b, v = game.CreateABoard(x, y, height, width, 0.1)
-		//p.Train(b)
-
-		//if len(p.LogsInput) > 3 || p.Won {
-		//
-		//	core.CreateData("data/minessweeper.csv", logs, ex, true, game.Bomb-1)
-		//
-		//}
+		b, v = game.CreateABoard(x, y, height, width, 0.11)
 
 		p.Clear(v)
 

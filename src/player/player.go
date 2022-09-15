@@ -60,10 +60,10 @@ func (p *Player) Evaluate(board [][]int) {
 
 	bigIndx := GetBestPos(calfAndPos)
 	pos := calfAndPos[bigIndx].Pos
-	//if !p.SupLearning {
-	//	p.LogsInput = append(p.LogsInput, GetInput(p.VisibleBoard, pos.Y, pos.X, game.Bomb-1))
-	//	p.LogsMoves = append(p.LogsMoves, pos)
-	//}
+	if !p.SupLearning {
+		p.LogsInput = append(p.LogsInput, GetInput(p.VisibleBoard, pos.Y, pos.X, game.Bomb-1))
+		p.LogsMoves = append(p.LogsMoves, pos)
+	}
 	p.VisibleBoard, p.Lose, p.Won = game.MakeAMove(pos.Y, pos.X, p.VisibleBoard, board)
 
 }
@@ -79,7 +79,7 @@ func (p *Player) Train(board [][]int) [][]float32 {
 	}
 	// for some reason that i detected i need to use a really low learning rate for the training process
 	// maybe you can search for that
-	p.Brain.Train(p.LogsInput, expected, 0.01, 1, false)
+	p.Brain.Train(p.LogsInput, expected, 0.005, 1, false)
 	return expected
 
 }
