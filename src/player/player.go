@@ -1,6 +1,9 @@
 package player
 
 import (
+	"math/rand"
+	"time"
+
 	"github.com/ranon-rat/neural-mines-sweeper/src/brain"
 	"github.com/ranon-rat/neural-mines-sweeper/src/core"
 	"github.com/ranon-rat/neural-mines-sweeper/src/game"
@@ -12,11 +15,10 @@ type Player struct {
 	Lose, Won, saveData, learnEachIteration, reinforcementLearning bool
 
 	LogsInput, LogsExpected, logsOutput [][]float32
-	pos                                 []float32
 }
 
-//thinking in multiple ways of evaluating this
-//hm maybe the way that i should do this is idk
+// thinking in multiple ways of evaluating this
+// hm maybe the way that i should do this is idk
 func NewPlayer(visibleBoard [][]int, activationFuncs []string, hiddenLayersLength []int, modelFile string, save, learnEach, reinforcementLearning bool) (p Player) {
 	p.saveData = save
 	p.learnEachIteration = learnEach
@@ -42,7 +44,7 @@ func (p *Player) Evaluate(board [][]int) {
 	itsFine := []CalfAndPos{}
 	for _, v := range xyAvaible {
 		// first I get the input from the board
-		input := GetInput(p.VisibleBoard, v.Y, v.X, game.Bomb-1)
+		input := GetInput(p.VisibleBoard, v.Y, v.X, 1)
 		// then i pass it to the neural network
 		out := p.Brain.Predict(input)
 		// the index 0 is for opening the cell
@@ -55,13 +57,13 @@ func (p *Player) Evaluate(board [][]int) {
 
 		if p.saveData {
 			p.LogsInput = append(p.LogsInput, input)
-			p.LogsExpected = append(p.LogsExpected, map[bool][]float32{true: {1, 0}, false: {0, 1}}[board[v.Y][v.X] == game.Bomb])
+			p.LogsExpected = append(p.LogsExpected, map[bool][]float32{true: {1}, false: {0}}[board[v.Y][v.X] == game.Bomb])
 		}
 		if p.learnEachIteration {
 
 			p.Brain.Train([][]float32{input},
-				[][]float32{map[bool][]float32{true: {1, 0}, false: {0, 1}}[board[v.Y][v.X] == game.Bomb]},
-				0.010054, 1, false)
+				[][]float32{map[bool][]float32{true: {1}, false: {0}}[board[v.Y][v.X] == game.Bomb]},
+				0.125, 1, false)
 		}
 
 	}
@@ -75,9 +77,8 @@ func (p *Player) Evaluate(board [][]int) {
 
 	p.VisibleBoard, p.Lose, p.Won = game.MakeAMove(pos.Y, pos.X, p.VisibleBoard, board)
 	if p.reinforcementLearning {
-		p.LogsInput = append(p.LogsInput, GetInput(p.VisibleBoard, calfAndPos[bigIndx].Pos.Y, calfAndPos[bigIndx].Pos.X, game.Bomb-1))
+		p.LogsInput = append(p.LogsInput, GetInput(p.VisibleBoard, calfAndPos[bigIndx].Pos.Y, calfAndPos[bigIndx].Pos.X, 1))
 		p.logsOutput = append(p.logsOutput, calfAndPos[bigIndx].Calf)
-		p.pos = append(p.pos, map[bool]float32{true: -1, false: 1}[p.Lose])
 	}
 
 }
@@ -96,13 +97,26 @@ func (p *Player) Train() {
 
 	}
 	for i, v := range wdSum {
-		p.Brain.UpdateWeightAndBias(float32(len(p.logsOutput)), .000001*p.pos[i], v, bdSum[i])
+		p.Brain.UpdateWeightAndBias(float32(len(p.logsOutput)), 0.01, v, bdSum[i])
 	}
 }
 
 func (p *Player) Clear(visibleBoard [][]int) {
-	p.LogsExpected = [][]float32{}
-	p.LogsInput = [][]float32{}
+	if len(p.LogsExpected) > 1000 {
+
+		rand.Seed(time.Now().UnixNano())
+		rand.Shuffle(len(p.LogsInput), func(i, j int) {
+			p.LogsInput[i], p.LogsInput[j] = p.LogsInput[j], p.LogsInput[i]
+			p.logsOutput[i], p.logsOutput[j] = p.logsOutput[j], p.logsOutput[i]
+			p.LogsExpected[i], p.LogsExpected[j] = p.LogsExpected[j], p.LogsExpected[i]
+
+		})
+		p.logsOutput = p.logsOutput[:1000]
+		p.LogsInput = p.logsOutput[:1000]
+
+		p.LogsExpected = p.logsOutput[:1000]
+
+	}
 	p.VisibleBoard = visibleBoard
 	p.Lose = false
 }

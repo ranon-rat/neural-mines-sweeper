@@ -52,8 +52,8 @@ func CreateABoard(bombs, xMv, yMv, height, width int) (board, visibleBoard [][]i
 	return
 }
 
-//I dont want to repeat this multiple times
-//I want to avoid having a bomb close origin
+// I dont want to repeat this multiple times
+// I want to avoid having a bomb close origin
 func checkLR(y, x, xMv, yMv int) bool {
 	return ((x == xMv) || (x == xMv+1) || (xMv-1 == x)) && (y == yMv)
 }
