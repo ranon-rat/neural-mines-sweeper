@@ -32,6 +32,12 @@ func devTanh(x float32) float32 {
 	return 1 - (x * x)
 
 }
+func softPlus(x float32) float32 {
+	return float32(math.Log(1 + math.Exp(float64(x))))
+}
+func devSoftPlus(y float32) float32 {
+	return sigmoid(float32(math.Log(math.Exp(float64(y)) - 1)))
+}
 
 var (
 	MathFuncs = map[string]map[string]func(float32) float32{
@@ -46,6 +52,10 @@ var (
 		"tanh": {
 			"derivative": devTanh,
 			"activate":   tanh,
+		},
+		"soft-plus": {
+			"activate":   softPlus,
+			"derivative": devSoftPlus,
 		},
 	}
 )

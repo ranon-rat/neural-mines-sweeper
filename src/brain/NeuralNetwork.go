@@ -76,7 +76,7 @@ func (net NN) FeedFoward(input []float32) (layers [][]float32) {
 	return
 }
 
-//you know why this is for
+// you know why this is for
 func (net NN) Predict(input []float32) []float32 {
 	lays := net.FeedFoward(input)
 	return lays[len(lays)-1]
