@@ -7,7 +7,7 @@ import (
 
 type CalfAndPos struct {
 	Pos  core.XY
-	Calf float32
+	Calf []float32
 }
 
 func getLAndR(visibleBoard [][]int, y, x, row int, out []float32, scale float32) []float32 {
@@ -65,7 +65,7 @@ func GetInput(visibleBoard [][]int, y, x int, scale float32) (out []float32) {
 // it just get me the bigger value
 func GetBestPos(a []CalfAndPos) (index int) {
 	for i := 0; i < len(a); i++ {
-		if a[index].Calf > a[i].Calf {
+		if a[index].Calf[0] > a[i].Calf[0] {
 			continue
 		}
 		index = i

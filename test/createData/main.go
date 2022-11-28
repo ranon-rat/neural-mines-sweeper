@@ -15,7 +15,7 @@ func main() {
 	x, y := rand.Intn(width), rand.Intn(height)
 
 	b, v := game.CreateABoard(4, x, y, height, width)
-	p := player.NewPlayer(v, nil, nil, "../../neuralNetwork/mines-sweeper.json", false)
+	p := player.NewPlayer(v, nil, nil, "../../neuralNetwork/mines-sweeper.json", false, true, false)
 
 	for i := 0; !p.Won && i < 10000; i++ {
 		for j := 0; !p.Lose && !p.Won; j++ {

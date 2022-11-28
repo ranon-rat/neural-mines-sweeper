@@ -155,6 +155,7 @@ func (net *NN) UpdateWeightAndBias(size, learningRate float32, weightsGrad [][][
 
 }
 func (net *NN) Train(dataset, expected [][]float32, learningRate float32, epochs int, logs bool) {
+
 	// so , this works for making stuff much faster
 	// concurrence baby
 	var wg sync.WaitGroup
@@ -187,7 +188,9 @@ func (net *NN) Train(dataset, expected [][]float32, learningRate float32, epochs
 		}
 		// after all functions finish to execute it continues
 		wg.Wait()
+
 		for j := range dbList {
+
 			// with this i get the gradient of each input, so each gradient have the same gradient
 			net.UpdateWeightAndBias(float32(len(dataset)), learningRate, wdList[j], dbList[j])
 		}

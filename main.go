@@ -20,13 +20,7 @@ func main() {
 
 	x, y := rand.Intn(width-1), rand.Intn(height-1)
 	b, v := game.CreateABoard(9, x, y, height, width)
-	p := player.NewPlayer(v, []string{
-		"tanh", "relu", "relu", "tanh", "relu", "relu",
-		"tanh", "relu", "tanh", "relu", "tanh",
-	}, []int{
-		20, 19, 18, 19, 18,
-		17, 18, 16, 15,
-	}, model, false)
+	p := player.NewPlayer(v, []string{"tanh", "tanh", "tanh"}, []int{20, 20}, "", false, false, true)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -37,9 +31,10 @@ func main() {
 		os.Exit(1)
 	}()
 	av := 0.0
-	for i := 0; !p.Won && i < 10000; i++ {
+	for i := 0; i < 100000 && !p.Won; i++ {
 		m := 0.0
 		for j := 0; !p.Lose && !p.Won; j++ {
+
 			p.Evaluate(b)
 			if i%100 == 0 {
 				fmt.Printf("| moves: %d | average: %.4f | epoch : %d \n ", j, av/100, i)
@@ -47,6 +42,7 @@ func main() {
 			}
 			m++
 		}
+		p.Train()
 		if i%100 == 0 {
 			av = 0
 		}

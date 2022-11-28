@@ -7,20 +7,22 @@ import (
 )
 
 type Player struct {
-	Brain               brain.NN
-	VisibleBoard        [][]int
-	Lose, Won, saveData bool
+	Brain                                                          brain.NN
+	VisibleBoard                                                   [][]int
+	Lose, Won, saveData, learnEachIteration, reinforcementLearning bool
 
-	LogsInput    [][]float32
-	LogsExpected [][]float32
+	LogsInput, LogsExpected, logsOutput [][]float32
+	pos                                 []float32
 }
 
 //thinking in multiple ways of evaluating this
 //hm maybe the way that i should do this is idk
-func NewPlayer(visibleBoard [][]int, activationFuncs []string, hiddenLayersLength []int, modelFile string, save bool) (p Player) {
+func NewPlayer(visibleBoard [][]int, activationFuncs []string, hiddenLayersLength []int, modelFile string, save, learnEach, reinforcementLearning bool) (p Player) {
 	p.saveData = save
+	p.learnEachIteration = learnEach
+	p.reinforcementLearning = reinforcementLearning
 	if modelFile == "" {
-		hiddenLayersLength = append(hiddenLayersLength, 2)
+		hiddenLayersLength = append(hiddenLayersLength, 1)
 		layers := append([]int{25}, hiddenLayersLength...)
 		p.Brain = brain.NewNeuralNetwork(layers, activationFuncs, "a simple model lol")
 	} else {
@@ -44,19 +46,22 @@ func (p *Player) Evaluate(board [][]int) {
 		// then i pass it to the neural network
 		out := p.Brain.Predict(input)
 		// the index 0 is for opening the cell
-		calfAndPos = append(calfAndPos, CalfAndPos{Calf: out[1], Pos: v})
+		calfAndPos = append(calfAndPos, CalfAndPos{Calf: out, Pos: v})
 		// 1 open obviously
-		if p.saveData {
-			p.LogsInput = append(p.LogsInput, input)
-			p.LogsExpected = append(p.LogsExpected, map[bool][]float32{true: {1, 0}, false: {0, 1}}[board[v.Y][v.X] == game.Bomb])
-		} else {
-			p.Brain.Train([][]float32{input},
-				[][]float32{map[bool][]float32{true: {1, 0}, false: {0, 1}}[board[v.Y][v.X] == game.Bomb]}, 0.00094, 1, false)
+		if core.GetBiggerIndex(out) == 1 {
+			itsFine = append(itsFine, CalfAndPos{Calf: out, Pos: v})
 
 		}
 
-		if core.GetBiggerIndex(out) == 1 {
-			itsFine = append(calfAndPos, CalfAndPos{Calf: out[1], Pos: v})
+		if p.saveData {
+			p.LogsInput = append(p.LogsInput, input)
+			p.LogsExpected = append(p.LogsExpected, map[bool][]float32{true: {1, 0}, false: {0, 1}}[board[v.Y][v.X] == game.Bomb])
+		}
+		if p.learnEachIteration {
+
+			p.Brain.Train([][]float32{input},
+				[][]float32{map[bool][]float32{true: {1, 0}, false: {0, 1}}[board[v.Y][v.X] == game.Bomb]},
+				0.010054, 1, false)
 		}
 
 	}
@@ -69,6 +74,11 @@ func (p *Player) Evaluate(board [][]int) {
 	pos := calfAndPos[bigIndx].Pos
 
 	p.VisibleBoard, p.Lose, p.Won = game.MakeAMove(pos.Y, pos.X, p.VisibleBoard, board)
+	if p.reinforcementLearning {
+		p.LogsInput = append(p.LogsInput, GetInput(p.VisibleBoard, calfAndPos[bigIndx].Pos.Y, calfAndPos[bigIndx].Pos.X, game.Bomb-1))
+		p.logsOutput = append(p.logsOutput, calfAndPos[bigIndx].Calf)
+		p.pos = append(p.pos, map[bool]float32{true: -1, false: 1}[p.Lose])
+	}
 
 }
 
@@ -77,8 +87,17 @@ func (p *Player) Train() {
 
 	// for some reason that i detected i need to use a really low learning rate for the training process
 	// maybe you can search for that
-	p.Brain.Train(p.LogsInput, p.LogsExpected, 0.0001, 1, false)
+	wdSum, bdSum := [][][][]float32{}, [][][]float32{}
+	for i, v := range p.LogsInput {
+		layers := p.Brain.FeedFoward(v)
+		wd, bd := p.Brain.BackPropagation(layers, p.logsOutput[i])
+		wdSum = append(wdSum, wd)
+		bdSum = append(bdSum, bd)
 
+	}
+	for i, v := range wdSum {
+		p.Brain.UpdateWeightAndBias(float32(len(p.logsOutput)), .000001*p.pos[i], v, bdSum[i])
+	}
 }
 
 func (p *Player) Clear(visibleBoard [][]int) {

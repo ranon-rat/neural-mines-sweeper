@@ -46,9 +46,11 @@ func FindAvaibleCells(visibleBoard [][]int) (xyAvaible []core.XY) {
 
 	for i, v := range visibleBoard {
 		for j := range v {
+
 			input := GetArround(visibleBoard, i, j)
+			cells = append(cells, core.XY{X: j, Y: i})
+
 			if input[4] == game.UndiscoveredCell {
-				cells = append(cells, core.XY{X: j, Y: i})
 
 				s := 0
 				for _, q := range input {
@@ -58,7 +60,7 @@ func FindAvaibleCells(visibleBoard [][]int) (xyAvaible []core.XY) {
 					}
 				}
 				// i just see how many cells are opened around it
-				if s < 9 {
+				if s < 8 {
 
 					xyAvaible = append(xyAvaible, core.XY{X: j, Y: i})
 				}
